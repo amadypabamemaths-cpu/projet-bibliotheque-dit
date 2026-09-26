@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: biblio-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: biblio_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_bibliotheque:/var/lib/postgresql/data
+    networks:
+      - biblio-network
+
+  backend:
+    build: ./backend
+    container_name: biblio-backend
+    environment:
+      DB_HOST: db
+      DB_NAME: biblio_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - biblio-network
+
+  frontend:
+    build: ./frontend
+    container_name: biblio-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - biblio-network
+
+networks:
+  biblio-network:
+    driver: bridge
+
+volumes:
+  pgdata_bibliotheque:
